@@ -10,7 +10,7 @@ import java.util.UUID;
 
 
 @Repository
-public interface UserRepository extends JpaRepository<User,Long>{
+public interface UserRepository extends JpaRepository<User,UUID>{
     /**
      * Localiza um usuário pelo name
      * @param username
@@ -20,10 +20,10 @@ public interface UserRepository extends JpaRepository<User,Long>{
 
     /**
      * Localiza um usuário pelo id (UUID) da tabela
-     * @param userId
+     * @param id
      * @return User
      */
-    public User findById(UUID userId);
+//    public Optional<User> findById(UUID id);
 
     /**
      * Busca usuarios pelo nome iniciando com o parametro passado
@@ -31,4 +31,5 @@ public interface UserRepository extends JpaRepository<User,Long>{
      * @return List<User>
      */
     public List<User> findByNameStartingWith(String userName);
+
 }

@@ -60,41 +60,46 @@ public class UserController {
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
+//    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
     public ResponseEntity<List<User>> listAllUsers() {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
 
     @GetMapping("/users/{name}")
-    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
+//    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
     public ResponseEntity<List<User>> searchUserByUserName(@PathVariable("name") String name) {
         List<User> users = userRepository.findByNameStartingWith(name);
         return ResponseEntity.ok(users);
     }
 
     @Transactional
-    @PutMapping("/users")
+    @PutMapping("/update-user")
     public ResponseEntity<User> updateUser(@RequestBody CreateUserDto createUserDto,JwtAuthenticationToken token){
 
-        User tokenUser = userRepository.findById(UUID.fromString(token.getName()));
-        tokenUser.setName(createUserDto.name());
-        tokenUser.setPassword(createUserDto.password());
-        userRepository.save(tokenUser);
+        Optional<User> tokenUser = userRepository.findById(UUID.fromString(token.getName()));
+        if(tokenUser.isEmpty()){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
+
+        tokenUser.get().setName(createUserDto.name());
+        tokenUser.get().setPassword(createUserDto.password());
+        userRepository.save(tokenUser.get());
         return ResponseEntity.ok().build();
     }
 
+    //TODO colocar id em um body json
     @Transactional
     @DeleteMapping("/users/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long userId, JwtAuthenticationToken token) {
+//    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
+    public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID userId, JwtAuthenticationToken token) {
 
-        User tokenUser = userRepository.findById(UUID.fromString(token.getName()));
+        Optional<User> tokenUser = userRepository.findById(UUID.fromString(token.getName()));
 
-        boolean isAdmin = tokenUser.getRoles()
+        boolean isAdmin = tokenUser.get().getRoles()
                 .stream().anyMatch(role -> role.getId().equals(Role.Values.ADMIN.getId()));
 
-        if (isAdmin || tokenUser.getId().equals(userId)) {
+        if (isAdmin || tokenUser.get().getId().equals(userId)) {
             userRepository.deleteById(userId);
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
