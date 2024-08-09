@@ -5,8 +5,7 @@ import jakarta.persistence.*;
 import java.io.Serializable;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Person implements Serializable {
+public class Person implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -23,7 +22,7 @@ public abstract class Person implements Serializable {
     private String cpfNumber;
 
     @ManyToOne
-    @JoinColumn(name = "address_id",nullable = false)
+    @JoinColumn(name = "address_id",nullable = true)
     private Address address;
 
     @OneToOne(fetch = FetchType.EAGER)
