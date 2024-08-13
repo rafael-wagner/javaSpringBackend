@@ -1,7 +1,9 @@
 package com.example.javaBackend.repository;
 
+import com.example.javaBackend.entities.Role;
 import com.example.javaBackend.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -13,23 +15,40 @@ import java.util.UUID;
 public interface UserRepository extends JpaRepository<User,UUID>{
     /**
      * Localiza um usuário pelo name
-     * @param username
-     * @return Optional<User>
+     * @param userName nome de usuário
+     * @return Optional <User> um usuário de nome igual ao param
      */
-    public Optional<User> findByName(String username);
+    @Query("select u from User u where u.name = :userName")
+    public Optional<User> findUserByName(String userName);
 
     /**
-     * Localiza um usuário pelo id (UUID) da tabela
-     * @param id
-     * @return User
+     *
+     * @param name nome para busca
+     * @return List User de usuários com nome similar(like)
      */
-//    public Optional<User> findById(UUID id);
+    @Query("select u from User u where u.name like :name%")
+    public List<User> findByName(String name);
 
     /**
-     * Busca usuarios pelo nome iniciando com o parametro passado
-     * @param userName
-     * @return List<User>
+     *
+     * @param email email de usuário
+     * @return List de User
      */
-    public List<User> findByNameStartingWith(String userName);
+    List<User> findByEmail(String email);
+
+    /**
+     *
+     * @param name nome de usuário
+     * @param email email de usuário
+     * @return List de User
+     */
+    @Query("select u from User u where u.name like %:name% and u.email like :email% order by u.name")
+    List<User> findByNameAndEmail(String name, String email);
+
+    @Query("select u from User u join u.roles r where r = :role")
+    List<User> findByRole(Role role);
+
+    @Query("select u from User u")
+    List<User> findAll();
 
 }

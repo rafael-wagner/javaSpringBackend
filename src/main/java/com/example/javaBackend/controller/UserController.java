@@ -1,12 +1,13 @@
 package com.example.javaBackend.controller;
 
-import com.example.javaBackend.controller.dto.CreateUserDto;
-import com.example.javaBackend.controller.dto.UserDto;
+import com.example.javaBackend.controller.dto.UserWithPersonDto;
 import com.example.javaBackend.entities.Person;
 import com.example.javaBackend.entities.Role;
 import com.example.javaBackend.entities.User;
+import com.example.javaBackend.entities.jsonview.UserView;
 import com.example.javaBackend.repository.RoleRepository;
 import com.example.javaBackend.repository.UserRepository;
+import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,13 +37,12 @@ public class UserController {
     }
 
     @Transactional
-    @PostMapping("/users")
-    public ResponseEntity<User> newUser(@RequestBody CreateUserDto createUserDto) {
+    @PostMapping("/api/users")
+    public ResponseEntity<User> newUser(@RequestBody UserWithPersonDto createUserDto) {
 
         Role basicRole = roleRepository.findByName(Role.Values.BASIC.name());
-        Optional<User> userDb = userRepository.findByName(createUserDto.name());
-
-        if (userDb.isPresent()) {
+        Optional<User> userDb = userRepository.findUserByName(createUserDto.name());
+        if (userDb.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
@@ -63,36 +63,59 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/hello")
+    @GetMapping("/api/hello")
     public ResponseEntity<String[]> firstPage(){
         return ResponseEntity.ok(new String[]{"HELLO"});
     }
 
-    @GetMapping("/users")
-    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
+    @GetMapping("/api/users/")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @JsonView(UserView.Admin.class)
     public ResponseEntity<List<User>> listAllUsers() {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/users/{name}")
+    @GetMapping("/api/users")
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<List<User>> searchUserByUserName(@PathVariable("name") String name) {
-        List<User> users = userRepository.findByNameStartingWith(name);
+    @JsonView(UserView.Basic.class)
+    public ResponseEntity<List<User>> searchUserByUserName(
+            @RequestParam(defaultValue = "") String name,@RequestParam(defaultValue = "") String email) {
+        boolean isNameBlank = name.isBlank();
+        boolean isEmailBlank = email.isBlank();
+        List<User> users = null;
+
+        if(isNameBlank && isEmailBlank){
+            users = userRepository.findAll();
+            return ResponseEntity.ok(users);
+        }
+
+        if (!isNameBlank) {
+            if(!isEmailBlank){
+                users = userRepository.findByNameAndEmail(name,email);
+                return ResponseEntity.ok(users);
+            } else {
+                users = userRepository.findByName(name);
+                return ResponseEntity.ok(users);
+            }
+        }
+
+        users = userRepository.findByEmail(email);
         return ResponseEntity.ok(users);
+
     }
 
     @Transactional
-    @PutMapping("/users")
+    @PutMapping("/api/users")
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<User> updateUser(@RequestBody CreateUserDto userUpdateDto, JwtAuthenticationToken token){
+    public ResponseEntity<User> updateUser(@RequestBody UserWithPersonDto userUpdateDto, JwtAuthenticationToken token){
 
         Optional<User> tokenUser = userRepository.findById(UUID.fromString(token.getName()));
         if(tokenUser.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        Optional<User> userDb = userRepository.findByName(userUpdateDto.name());
+        Optional<User> userDb = userRepository.findUserByName(userUpdateDto.name());
         if(userDb.isEmpty()){
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
@@ -119,7 +142,7 @@ public class UserController {
     }
 
     @Transactional
-    @DeleteMapping("/users/{id}")
+    @DeleteMapping("/api/users/{id}")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID id, JwtAuthenticationToken token) {
 
@@ -140,12 +163,5 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
-    private void checkIfAllowed(UserDto userDto, User tokenUser) {
-        boolean isAdmin = tokenUser.getRoles()
-                .stream().anyMatch(role -> role.getId().equals(Role.Values.ADMIN.getId()));
-        if(isAdmin || tokenUser.getId().equals(userDto.id())){
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN);
-        }
-    }
 
 }

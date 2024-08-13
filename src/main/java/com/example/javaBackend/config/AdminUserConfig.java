@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -37,10 +38,12 @@ public class AdminUserConfig implements CommandLineRunner{
         Role roleBasic = roleRepository.findByName(Role.Values.BASIC.name());
         Set<Role> roles = Set.of(roleAdmin,roleBasic);
 
-        Optional<User> userAdmin = userRepository.findByName(Role.Values.ADMIN.name());
+        List<User> users = userRepository.findByRole(roleAdmin);
 
 
-        userAdmin.ifPresentOrElse(
+        users.stream().filter(u -> u.getRoles().contains(roleAdmin))
+                .findAny()
+                .ifPresentOrElse(
                 (user) -> {
                     System.out.println("admin ja existe");
                 },

@@ -1,8 +1,11 @@
 package com.example.javaBackend.entities;
 
+import com.example.javaBackend.entities.jsonview.UserView;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 public class Person implements Serializable {
@@ -13,19 +16,22 @@ public class Person implements Serializable {
     private Long id;
 
     @Column(name="name")
+    @JsonView(UserView.Basic.class)
     private String name;
 
     @Column(name="phone")
+    @JsonView(UserView.Basic.class)
     private String PhoneNumber;
 
     @Column(name="cpf",unique = true)
+    @JsonView(UserView.Basic.class)
     private String cpfNumber;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id",nullable = true)
     private Address address;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch=FetchType.EAGER,cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id",nullable = true)
     private User user;
 
@@ -78,4 +84,16 @@ public class Person implements Serializable {
         PhoneNumber = phoneNumber;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Person person = (Person) o;
+        return Objects.equals(id, person.id) && Objects.equals(cpfNumber, person.cpfNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, cpfNumber);
+    }
 }

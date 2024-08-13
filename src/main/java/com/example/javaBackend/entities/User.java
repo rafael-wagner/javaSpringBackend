@@ -1,9 +1,12 @@
 package com.example.javaBackend.entities;
 import com.example.javaBackend.controller.dto.LoginRequest;
+import com.example.javaBackend.entities.jsonview.UserView;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.Serializable;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -14,34 +17,39 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
+    @JsonView(UserView.Admin.class)
     private UUID id;
 
     @Column(
-            nullable = false
-            , name = "name"
-            , length = 16
+        nullable = false
+        , name = "name"
+        , length = 16
     )
+    @JsonView(UserView.Basic.class)
     private String name;
 
     @Column(
-            nullable = false
-            , name = "password"
-            , length = 64
+        nullable = false
+        , name = "password"
+        , length = 64
     )
     private String password;
 
     @Column(name="email")
+    @JsonView(UserView.Basic.class)
     private String email;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-            name = "user_role"
-            , joinColumns = @JoinColumn(name = "user_id")
-            , inverseJoinColumns = @JoinColumn(name = "role_id")
+        name = "user_role"
+        , joinColumns = @JoinColumn(name = "user_id")
+        , inverseJoinColumns = @JoinColumn(name = "role_id")
     )
+    @JsonView(UserView.Admin.class)
     private Set<Role> roles;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
+    @JsonView(UserView.Basic.class)
     private Person person;
 
     public User() {
@@ -97,5 +105,18 @@ public class User implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, email);
     }
 }

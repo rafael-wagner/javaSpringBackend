@@ -1,8 +1,11 @@
 package com.example.javaBackend.entities;
 
+import com.example.javaBackend.entities.jsonview.UserView;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -18,7 +21,11 @@ public class Role implements Serializable {
             , name = "name"
             , length = 16
     )
+    @JsonView(UserView.Admin.class)
     private String name;
+
+    @ManyToMany(mappedBy = "roles")
+    List<User> users;
 
     public enum Values {
         ADMIN(1L)
@@ -51,6 +58,14 @@ public class Role implements Serializable {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public List<User> getUsers() {
+        return users;
+    }
+
+    public void setUsers(List<User> users) {
+        this.users = users;
     }
 
     @Override
