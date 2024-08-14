@@ -1,6 +1,6 @@
 package com.example.javaBackend.entities;
 
-import com.example.javaBackend.entities.jsonview.UserView;
+import com.example.javaBackend.entities.jsonview.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 
@@ -16,22 +16,23 @@ public class Person implements Serializable {
     private Long id;
 
     @Column(name="name")
-    @JsonView(UserView.Basic.class)
+    @JsonView(View.Basic.class)
     private String name;
 
     @Column(name="phone")
-    @JsonView(UserView.Basic.class)
+    @JsonView(View.Basic.class)
     private String PhoneNumber;
 
     @Column(name="cpf",unique = true)
-    @JsonView(UserView.Basic.class)
+    @JsonView(View.Basic.class)
     private String cpfNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id",nullable = true)
     private Address address;
 
-    @OneToOne(fetch=FetchType.EAGER,cascade = CascadeType.ALL)
+    /*TODO verificar @OneToOne causando FetchType ficar EAGER ao invez de lazy*/
+    @OneToOne(fetch=FetchType.LAZY,cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id",nullable = true)
     private User user;
 

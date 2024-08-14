@@ -3,6 +3,7 @@ package com.example.javaBackend.entities;
 import jakarta.persistence.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Entity
 @Table(name = "address")
@@ -111,5 +112,18 @@ public class Address implements Serializable {
 
     public void setLandmark(String landmark) {
         this.landmark = landmark;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Address address = (Address) o;
+        return Objects.equals(id, address.id) && Objects.equals(postalCode, address.postalCode) && Objects.equals(lane, address.lane) && Objects.equals(city, address.city) && Objects.equals(county, address.county) && Objects.equals(uf, address.uf) && Objects.equals(number, address.number) && Objects.equals(country, address.country) && Objects.equals(landmark, address.landmark);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, postalCode, lane, city, county, uf, number, country, landmark);
     }
 }

@@ -34,6 +34,7 @@ public interface UserRepository extends JpaRepository<User,UUID>{
      * @param email email de usuário
      * @return List de User
      */
+    @Query("select u from User u where u.email like :email% order by u.email")
     List<User> findByEmail(String email);
 
     /**

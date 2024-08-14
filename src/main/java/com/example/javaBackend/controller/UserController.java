@@ -4,10 +4,12 @@ import com.example.javaBackend.controller.dto.UserWithPersonDto;
 import com.example.javaBackend.entities.Person;
 import com.example.javaBackend.entities.Role;
 import com.example.javaBackend.entities.User;
-import com.example.javaBackend.entities.jsonview.UserView;
+import com.example.javaBackend.entities.jsonview.View;
 import com.example.javaBackend.repository.RoleRepository;
 import com.example.javaBackend.repository.UserRepository;
 import com.fasterxml.jackson.annotation.JsonView;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,11 +22,13 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 
 @RestController
+@RequestMapping("/api/users")
 public class UserController {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
     public UserController(
             UserRepository userRepository
@@ -37,12 +41,12 @@ public class UserController {
     }
 
     @Transactional
-    @PostMapping("/api/users")
-    public ResponseEntity<User> newUser(@RequestBody UserWithPersonDto createUserDto) {
+    @PostMapping()
+    public ResponseEntity<?> createUser(@RequestBody UserWithPersonDto createUserDto) {
 
         Role basicRole = roleRepository.findByName(Role.Values.BASIC.name());
         Optional<User> userDb = userRepository.findUserByName(createUserDto.name());
-        if (userDb.isEmpty()) {
+        if (userDb.isPresent()) {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY);
         }
 
@@ -56,6 +60,7 @@ public class UserController {
         newPerson.setName(createUserDto.person().name());
         newPerson.setCpfNumber(createUserDto.person().cpf());
         newPerson.setPhoneNumber(createUserDto.person().phone());
+        newPerson.setUser(newUser);
         newUser.setPerson(newPerson);
 
         userRepository.save(newUser);
@@ -68,18 +73,18 @@ public class UserController {
         return ResponseEntity.ok(new String[]{"HELLO"});
     }
 
-    @GetMapping("/api/users/")
+    @GetMapping("/")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    @JsonView(UserView.Admin.class)
+    @JsonView(View.Admin.class)
     public ResponseEntity<List<User>> listAllUsers() {
         List<User> users = userRepository.findAll();
         return ResponseEntity.ok(users);
     }
 
-    @GetMapping("/api/users")
+    @GetMapping()
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    @JsonView(UserView.Basic.class)
-    public ResponseEntity<List<User>> searchUserByUserName(
+    @JsonView(View.Basic.class)
+    public ResponseEntity<List<User>> searchUserByUserNameAndEmail(
             @RequestParam(defaultValue = "") String name,@RequestParam(defaultValue = "") String email) {
         boolean isNameBlank = name.isBlank();
         boolean isEmailBlank = email.isBlank();
@@ -106,7 +111,7 @@ public class UserController {
     }
 
     @Transactional
-    @PutMapping("/api/users")
+    @PutMapping()
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
     public ResponseEntity<User> updateUser(@RequestBody UserWithPersonDto userUpdateDto, JwtAuthenticationToken token){
 
@@ -142,7 +147,7 @@ public class UserController {
     }
 
     @Transactional
-    @DeleteMapping("/api/users/{id}")
+    @DeleteMapping("/{id}")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID id, JwtAuthenticationToken token) {
 
@@ -154,12 +159,11 @@ public class UserController {
         boolean isAdmin = tokenUser.get().getRoles()
                 .stream().anyMatch(role -> role.getId().equals(Role.Values.ADMIN.getId()));
 
-        if (isAdmin || tokenUser.get().getId().equals(id)) {
-            userRepository.deleteById(id);
-        } else {
+        if (!isAdmin ) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
+        userRepository.deleteById(id);
         return ResponseEntity.ok().build();
     }
 

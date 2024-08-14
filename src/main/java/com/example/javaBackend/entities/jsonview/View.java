@@ -1,6 +1,6 @@
 package com.example.javaBackend.entities.jsonview;
 
-public interface UserView {
+public interface View {
 
     public interface Basic{}
 

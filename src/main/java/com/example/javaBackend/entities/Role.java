@@ -1,6 +1,6 @@
 package com.example.javaBackend.entities;
 
-import com.example.javaBackend.entities.jsonview.UserView;
+import com.example.javaBackend.entities.jsonview.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 
@@ -21,7 +21,7 @@ public class Role implements Serializable {
             , name = "name"
             , length = 16
     )
-    @JsonView(UserView.Admin.class)
+    @JsonView(View.Admin.class)
     private String name;
 
     @ManyToMany(mappedBy = "roles")

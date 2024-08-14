@@ -1,6 +1,6 @@
 package com.example.javaBackend.entities;
 import com.example.javaBackend.controller.dto.LoginRequest;
-import com.example.javaBackend.entities.jsonview.UserView;
+import com.example.javaBackend.entities.jsonview.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,15 +17,16 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    @JsonView(UserView.Admin.class)
+    @JsonView(View.Admin.class)
     private UUID id;
 
     @Column(
         nullable = false
         , name = "name"
         , length = 16
+        ,unique = true
     )
-    @JsonView(UserView.Basic.class)
+    @JsonView(View.Basic.class)
     private String name;
 
     @Column(
@@ -35,8 +36,8 @@ public class User implements Serializable {
     )
     private String password;
 
-    @Column(name="email")
-    @JsonView(UserView.Basic.class)
+    @Column(name="email",unique = true)
+    @JsonView(View.Basic.class)
     private String email;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -45,11 +46,11 @@ public class User implements Serializable {
         , joinColumns = @JoinColumn(name = "user_id")
         , inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    @JsonView(UserView.Admin.class)
+    @JsonView(View.Admin.class)
     private Set<Role> roles;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
-    @JsonView(UserView.Basic.class)
+    @JsonView(View.Basic.class)
     private Person person;
 
     public User() {
