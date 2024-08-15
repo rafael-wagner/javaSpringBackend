@@ -69,7 +69,7 @@ public class UserController {
     }
 
     @GetMapping("/api/hello")
-    public ResponseEntity<String[]> firstPage(){
+    public ResponseEntity<String[]> firstPage() {
         return ResponseEntity.ok(new String[]{"HELLO"});
     }
 
@@ -85,19 +85,19 @@ public class UserController {
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
     @JsonView(View.Basic.class)
     public ResponseEntity<List<User>> searchUserByUserNameAndEmail(
-            @RequestParam(defaultValue = "") String name,@RequestParam(defaultValue = "") String email) {
+            @RequestParam(defaultValue = "") String name, @RequestParam(defaultValue = "") String email) {
         boolean isNameBlank = name.isBlank();
         boolean isEmailBlank = email.isBlank();
-        List<User> users = null;
+        List<User> users = new ArrayList<>();
 
-        if(isNameBlank && isEmailBlank){
+        if (isNameBlank && isEmailBlank) {
             users = userRepository.findAll();
             return ResponseEntity.ok(users);
         }
 
         if (!isNameBlank) {
-            if(!isEmailBlank){
-                users = userRepository.findByNameAndEmail(name,email);
+            if (!isEmailBlank) {
+                users = userRepository.findByNameAndEmail(name, email);
                 return ResponseEntity.ok(users);
             } else {
                 users = userRepository.findByName(name);
@@ -113,19 +113,19 @@ public class UserController {
     @Transactional
     @PutMapping()
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<User> updateUser(@RequestBody UserWithPersonDto userUpdateDto, JwtAuthenticationToken token){
+    public ResponseEntity<User> updateUser(@RequestBody UserWithPersonDto userUpdateDto, JwtAuthenticationToken token) {
 
         Optional<User> tokenUser = userRepository.findById(UUID.fromString(token.getName()));
-        if(tokenUser.isEmpty()){
+        if (tokenUser.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
         Optional<User> userDb = userRepository.findUserByName(userUpdateDto.name());
-        if(userDb.isEmpty()){
+        if (userDb.isEmpty()) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
         }
 
-        if(tokenUser.get().getId().equals(userDb.get().getId())){
+        if (tokenUser.get().getId().equals(userDb.get().getId())) {
             userDb.get().setName(userUpdateDto.name());
             userDb.get().setEmail(userUpdateDto.email());
             userDb.get().setPassword(passwordEncoder.encode(userUpdateDto.password()));
@@ -135,37 +135,41 @@ public class UserController {
 
         boolean isAdmin = tokenUser.get().getRoles()
                 .stream().anyMatch(role -> role.getId().equals(Role.Values.ADMIN.getId()));
-        if (isAdmin){
+        if (isAdmin) {
             userDb.get().setName(userUpdateDto.name());
             userDb.get().setEmail(userUpdateDto.email());
             userDb.get().setPassword(passwordEncoder.encode(userUpdateDto.password()));
             userRepository.save(userDb.get());
             return ResponseEntity.ok().build();
-        }
-        else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        } else throw new ResponseStatusException(HttpStatus.NOT_FOUND);
 
     }
 
     @Transactional
-    @DeleteMapping("/{id}")
+    @DeleteMapping()
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") UUID id, JwtAuthenticationToken token) {
+    public ResponseEntity<Void> deleteUser(
+            @RequestParam String name
+            , JwtAuthenticationToken token) {
 
         Optional<User> tokenUser = userRepository.findById(UUID.fromString(token.getName()));
 
-        if(tokenUser.isEmpty()){
+        if (tokenUser.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
         boolean isAdmin = tokenUser.get().getRoles()
                 .stream().anyMatch(role -> role.getId().equals(Role.Values.ADMIN.getId()));
-
-        if (!isAdmin ) {
+        if (!isAdmin) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        userRepository.deleteById(id);
-        return ResponseEntity.ok().build();
+        Optional<User> userDelete = userRepository.findUserByName(name);
+        if(userDelete.isPresent()){
+            userRepository.deleteById(userDelete.get().getId());
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
     }
-
 
 }
