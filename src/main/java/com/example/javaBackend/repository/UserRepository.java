@@ -1,7 +1,7 @@
 package com.example.javaBackend.repository;
 
-import com.example.javaBackend.entities.Role;
-import com.example.javaBackend.entities.User;
+import com.example.javaBackend.entity.Role;
+import com.example.javaBackend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;

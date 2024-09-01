@@ -1,6 +1,6 @@
-package com.example.javaBackend.entities;
+package com.example.javaBackend.entity;
 
-import com.example.javaBackend.entities.jsonview.View;
+import com.example.javaBackend.entity.jsonview.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 

@@ -1,4 +1,4 @@
-package com.example.javaBackend.entities.jsonview;
+package com.example.javaBackend.entity.jsonview;
 
 public interface View {
 

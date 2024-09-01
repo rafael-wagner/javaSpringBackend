@@ -1,6 +1,6 @@
-package com.example.javaBackend.entities;
+package com.example.javaBackend.entity;
 import com.example.javaBackend.controller.dto.LoginRequest;
-import com.example.javaBackend.entities.jsonview.View;
+import com.example.javaBackend.entity.jsonview.View;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 import org.springframework.security.crypto.password.PasswordEncoder;

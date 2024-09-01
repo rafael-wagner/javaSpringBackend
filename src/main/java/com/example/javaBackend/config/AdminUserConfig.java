@@ -1,7 +1,7 @@
 package com.example.javaBackend.config;
 
-import com.example.javaBackend.entities.Role;
-import com.example.javaBackend.entities.User;
+import com.example.javaBackend.entity.Role;
+import com.example.javaBackend.entity.User;
 import com.example.javaBackend.repository.RoleRepository;
 import com.example.javaBackend.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -10,7 +10,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Configuration

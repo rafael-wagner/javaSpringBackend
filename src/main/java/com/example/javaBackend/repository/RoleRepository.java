@@ -1,6 +1,6 @@
 package com.example.javaBackend.repository;
 
-import com.example.javaBackend.entities.Role;
+import com.example.javaBackend.entity.Role;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

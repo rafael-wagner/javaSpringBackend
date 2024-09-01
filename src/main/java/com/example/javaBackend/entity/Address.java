@@ -1,4 +1,4 @@
-package com.example.javaBackend.entities;
+package com.example.javaBackend.entity;
 
 import jakarta.persistence.*;
 

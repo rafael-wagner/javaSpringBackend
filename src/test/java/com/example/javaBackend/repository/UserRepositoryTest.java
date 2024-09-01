@@ -1,7 +1,7 @@
 package com.example.javaBackend.repository;
 
-import com.example.javaBackend.entities.Role;
-import com.example.javaBackend.entities.User;
+import com.example.javaBackend.entity.Role;
+import com.example.javaBackend.entity.User;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;

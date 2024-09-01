@@ -2,7 +2,7 @@ package com.example.javaBackend.controller;
 
 import com.example.javaBackend.controller.dto.LoginRequest;
 import com.example.javaBackend.controller.dto.LoginResponse;
-import com.example.javaBackend.entities.User;
+import com.example.javaBackend.entity.User;
 import com.example.javaBackend.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -13,7 +13,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import com.example.javaBackend.entities.Role;
+import com.example.javaBackend.entity.Role;
 
 import java.time.Instant;
 import java.util.Optional;
