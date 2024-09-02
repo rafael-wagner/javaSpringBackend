@@ -24,17 +24,11 @@ public class Address implements Serializable {
     @Column(nullable = true, name = "city")
     private String city;
 
-    @Column(nullable = true, name = "county")
-    private String county;
-
     @Column(nullable = true, name = "state")
     private String uf;
 
     @Column(nullable = true, name = "number")
     private String number;
-
-    @Column(nullable = true, name = "country")
-    private String country;
 
     @Column(nullable = true, name = "landmark")
     private String landmark;
@@ -74,14 +68,6 @@ public class Address implements Serializable {
         this.city = city;
     }
 
-    public String getCounty() {
-        return county;
-    }
-
-    public void setCounty(String county) {
-        this.county = county;
-    }
-
     public String getUf() {
         return uf;
     }
@@ -98,14 +84,6 @@ public class Address implements Serializable {
         this.number = number;
     }
 
-    public String getCountry() {
-        return country;
-    }
-
-    public void setCountry(String country) {
-        this.country = country;
-    }
-
     public String getLandmark() {
         return landmark;
     }
@@ -119,11 +97,11 @@ public class Address implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Address address = (Address) o;
-        return Objects.equals(id, address.id) && Objects.equals(postalCode, address.postalCode) && Objects.equals(lane, address.lane) && Objects.equals(city, address.city) && Objects.equals(county, address.county) && Objects.equals(uf, address.uf) && Objects.equals(number, address.number) && Objects.equals(country, address.country) && Objects.equals(landmark, address.landmark);
+        return Objects.equals(id, address.id) && Objects.equals(postalCode, address.postalCode) && Objects.equals(lane, address.lane) && Objects.equals(city, address.city) && Objects.equals(uf, address.uf) && Objects.equals(number, address.number) && Objects.equals(landmark, address.landmark);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, postalCode, lane, city, county, uf, number, country, landmark);
+        return Objects.hash(id, postalCode, lane, city, uf, number, landmark);
     }
 }

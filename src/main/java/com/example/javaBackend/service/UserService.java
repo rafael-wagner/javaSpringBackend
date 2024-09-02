@@ -165,4 +165,16 @@ public class UserService {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    public ResponseEntity<User> getTokenUserInfo(JwtAuthenticationToken token) {
+
+        Optional<User> tokenUser = userRepository.findById(UUID.fromString(token.getName()));
+
+        if(tokenUser.isPresent()){
+            return ResponseEntity.ok().body(tokenUser.get());
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+    }
 }

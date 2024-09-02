@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -40,7 +39,7 @@ public class UserController {
 
     }
 
-    @GetMapping()
+    @GetMapping("/search")
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
     @JsonView(View.Basic.class)
     public ResponseEntity<List<User>> searchUserByUserNameAndEmail(
@@ -51,6 +50,12 @@ public class UserController {
 
     }
 
+    @GetMapping("/info")
+    @PreAuthorize("hasAuthority('SCOPE_BASIC')")
+    @JsonView(View.Basic.class)
+    public ResponseEntity<User> getTokenUserInfo(JwtAuthenticationToken token){
+        return userService.getTokenUserInfo(token);
+    }
 
     @PutMapping()
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
@@ -62,10 +67,9 @@ public class UserController {
 
     }
 
-    @Transactional
     @DeleteMapping()
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<Void> deleteUser(
+    public ResponseEntity<?> deleteUser(
             @RequestParam String name
             , JwtAuthenticationToken token) {
 
