@@ -116,4 +116,5 @@ class UserRepositoryTest {
         }
         return userList.get(0);
     }
+
 }

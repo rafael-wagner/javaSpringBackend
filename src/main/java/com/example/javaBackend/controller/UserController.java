@@ -1,8 +1,8 @@
 package com.example.javaBackend.controller;
 
-import com.example.javaBackend.controller.dto.UserWithPersonDto;
 import com.example.javaBackend.entity.User;
-import com.example.javaBackend.entity.jsonview.View;
+import com.example.javaBackend.entity.jsonview.PersonView;
+import com.example.javaBackend.entity.jsonview.UserView;
 import com.example.javaBackend.service.UserService;
 import com.fasterxml.jackson.annotation.JsonView;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,19 +20,20 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @PostMapping()
-    public ResponseEntity<?> createUser(@RequestBody UserWithPersonDto createUserDto) {
-        return userService.createUser(createUserDto);
-    }
-
     @GetMapping("/hello")
     public ResponseEntity<String[]> firstPage() {
         return ResponseEntity.ok(new String[]{"HELLO"});
     }
 
-    @GetMapping("/")
+    @PostMapping()
+    public ResponseEntity<?> createUser(@RequestBody
+                                            @JsonView(PersonView.SelfView.class) User newUser) {
+        return userService.createUser(newUser);
+    }
+
+    @GetMapping("admin/findAll")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    @JsonView(View.Admin.class)
+    @JsonView(PersonView.Admin.class)
     public ResponseEntity<List<User>> listAllUsers() {
 
         return userService.listAll();
@@ -41,7 +42,7 @@ public class UserController {
 
     @GetMapping("/search")
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    @JsonView(View.Basic.class)
+    @JsonView(PersonView.Basic.class)
     public ResponseEntity<List<User>> searchUserByUserNameAndEmail(
             @RequestParam(defaultValue = "") String name
             , @RequestParam(defaultValue = "") String email ) {
@@ -52,22 +53,30 @@ public class UserController {
 
     @GetMapping("/info")
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    @JsonView(View.Basic.class)
+    @JsonView(PersonView.SelfView.class)
     public ResponseEntity<User> getTokenUserInfo(JwtAuthenticationToken token){
         return userService.getTokenUserInfo(token);
     }
 
     @PutMapping()
     @PreAuthorize("hasAuthority('SCOPE_BASIC')")
-    public ResponseEntity<User> updateUser(
-            @RequestBody UserWithPersonDto userUpdateDto
+    public ResponseEntity<?> updateUser(
+            @RequestBody @JsonView(PersonView.SelfView.class) User userUpdate
             , JwtAuthenticationToken token) {
 
-        return userService.updateUser(userUpdateDto,token);
-
+        return userService.updateUser(userUpdate,token);
     }
 
-    @DeleteMapping()
+    @PutMapping("/admin")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<?> updateUserAsAdmin(
+            @RequestBody @JsonView(PersonView.Admin.class) User userUpdateDto
+            , JwtAuthenticationToken token) {
+
+        return userService.updateUserAsAdmin(userUpdateDto,token);
+    }
+
+    @DeleteMapping("/admin")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<?> deleteUser(
             @RequestParam String name

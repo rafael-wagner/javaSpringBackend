@@ -38,7 +38,7 @@ public class TokenController {
 
         Optional<User> user = userRepository.findUserByName(loginRequest.name());
 
-        if (user.isEmpty() || !user.get().isLoginCorrect(loginRequest, bCryptPasswordEncoder)) {
+        if (user.isEmpty() || !bCryptPasswordEncoder.matches(loginRequest.password(), user.get().getPassword())) {
             throw new BadCredentialsException("user or password is invalid !");
         }
 
@@ -47,21 +47,22 @@ public class TokenController {
                 .collect(Collectors.joining(" "));
 
         final Instant instant = Instant.now();
-        final Long expiryTime = 300L;
+        final long expiryTime = 300L;
 
         JwtClaimsSet claim = JwtClaimsSet.builder()
                 .issuer("mybackend")
                 .subject(user.get().getId().toString())
                 .issuedAt(instant)
                 .expiresAt(instant.plusSeconds(expiryTime))
-                .claim("scope",scope)
+                .claim("scope", scope)
                 .build();
 
 
         String jwtValue = jwtEncoder.encode(JwtEncoderParameters.from(claim)).getTokenValue();
 
-        return ResponseEntity.ok(new LoginResponse(jwtValue, expiryTime));
+        return ResponseEntity.ok(new LoginResponse(jwtValue));
 
     }
+
 
 }

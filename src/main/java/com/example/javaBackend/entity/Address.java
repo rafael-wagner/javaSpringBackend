@@ -1,7 +1,10 @@
 package com.example.javaBackend.entity;
 
+import com.example.javaBackend.entity.jsonview.AddressView;
+import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 
+import java.io.Serial;
 import java.io.Serializable;
 import java.util.Objects;
 
@@ -9,28 +12,34 @@ import java.util.Objects;
 @Table(name = "address")
 public class Address implements Serializable {
 
-    private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
+    @JsonView(AddressView.Admin.class)
     private Long id;
 
     @Column(nullable = false, name = "postal_code")
+    @JsonView(AddressView.Basic.class)
     private String postalCode;
 
     @Column(nullable = true, name = "lane")
+    @JsonView(AddressView.Detailed.class)
     private String lane;
 
     @Column(nullable = true, name = "city")
+    @JsonView(AddressView.Detailed.class)
     private String city;
 
     @Column(nullable = true, name = "state")
+    @JsonView(AddressView.Detailed.class)
     private String uf;
 
     @Column(nullable = true, name = "number")
+    @JsonView(AddressView.Detailed.class)
     private String number;
 
     @Column(nullable = true, name = "landmark")
+    @JsonView(AddressView.Detailed.class)
     private String landmark;
 
     public Address() {

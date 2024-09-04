@@ -11,6 +11,7 @@ public class CpfUtils {
                 && expectedValidationNumbers[1] == Character.getNumericValue(cpfNumber.charAt(10))) {
             return true;
         } else return false;
+
     }
 
     private static int[] CalcValidationNumbers(String cpfNumber) throws Exception {

@@ -1,9 +1,9 @@
 package com.example.javaBackend.entity;
-import com.example.javaBackend.controller.dto.LoginRequest;
-import com.example.javaBackend.entity.jsonview.View;
+
+import com.example.javaBackend.entity.jsonview.UserView;
+import com.example.javaBackend.entity.jsonview.PersonView;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.Serializable;
 import java.util.Objects;
@@ -17,40 +17,45 @@ public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "id")
-    @JsonView(View.Admin.class)
+    @JsonView(UserView.Admin.class)
     private UUID id;
 
     @Column(
-        nullable = false
-        , name = "name"
-        , length = 16
-        ,unique = true
+            nullable = false
+            , name = "name"
+            , length = 16
+            , unique = true
     )
-    @JsonView(View.Basic.class)
+
+    @JsonView({
+            UserView.Basic.class
+            , UserView.LoginCredentials.class
+    })
     private String name;
 
+    @JsonView(UserView.LoginCredentials.class)
     @Column(
-        nullable = false
-        , name = "password"
-        , length = 64
+            nullable = false
+            , name = "password"
+            , length = 64
     )
     private String password;
 
-    @Column(name="email",unique = true)
-    @JsonView(View.Basic.class)
+    @Column(name = "email", unique = true)
+    @JsonView(UserView.Basic.class)
     private String email;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
-        name = "user_role"
-        , joinColumns = @JoinColumn(name = "user_id")
-        , inverseJoinColumns = @JoinColumn(name = "role_id")
+            name = "user_role"
+            , joinColumns = @JoinColumn(name = "user_id")
+            , inverseJoinColumns = @JoinColumn(name = "role_id")
     )
-    @JsonView(View.Admin.class)
+    @JsonView(UserView.Admin.class)
     private Set<Role> roles;
 
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "user")
-    @JsonView(View.Basic.class)
+    @JsonView(PersonView.Basic.class)
     private Person person;
 
     public User() {
@@ -86,10 +91,6 @@ public class User implements Serializable {
 
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
-    }
-
-    public boolean isLoginCorrect(LoginRequest loginRequest, PasswordEncoder passwordEncoder) {
-        return passwordEncoder.matches(loginRequest.password(), this.password);
     }
 
     public Person getPerson() {

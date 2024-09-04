@@ -1,6 +1,9 @@
 package com.example.javaBackend.entity;
 
-import com.example.javaBackend.entity.jsonview.View;
+import com.example.javaBackend.entity.jsonview.AddressView;
+import com.example.javaBackend.entity.jsonview.PersonView;
+import com.example.javaBackend.entity.jsonview.UserView;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonView;
 import jakarta.persistence.*;
 
@@ -13,22 +16,26 @@ public class Person implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column( name = "id")
+    @JsonView(PersonView.Admin.class)
     private Long id;
 
     @Column(name="name")
-    @JsonView(View.Basic.class)
+    @JsonView(PersonView.Basic.class)
     private String name;
 
     @Column(name="phone")
-    @JsonView(View.Basic.class)
-    private String PhoneNumber;
+    @JsonView(UserView.Basic.class)
+    @JsonProperty("phone")
+    private String phoneNumber;
 
     @Column(name="cpf",unique = true)
-    @JsonView(View.Basic.class)
+    @JsonView(PersonView.SelfView.class)
+    @JsonProperty("cpf")
     private String cpfNumber;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id",nullable = true)
+    @JsonView(AddressView.Basic.class)
     private Address address;
 
     /*TODO verificar @OneToOne causando FetchType ficar EAGER ao invez de lazy*/
@@ -78,11 +85,11 @@ public class Person implements Serializable {
     }
 
     public String getPhoneNumber() {
-        return PhoneNumber;
+        return phoneNumber;
     }
 
     public void setPhoneNumber(String phoneNumber) {
-        PhoneNumber = phoneNumber;
+        this.phoneNumber = phoneNumber;
     }
 
     @Override
